@@ -1,0 +1,7 @@
+mymodule.my_custom_path:
+  path: "/my-custom-path"
+  defaults:
+    _controller: '\Drupal\mymodule\Controller\MyController::myCustomPath'
+    _title: "My Custom Path"
+  requirements:
+    _permission: "access content"
