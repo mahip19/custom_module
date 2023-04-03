@@ -1,0 +1,17 @@
+user_data_form.test_controller:
+  path: "/test_cont"
+  defaults:
+    _controller: '\Drupal\user_data_form\Controller\test_controller::myCustomPath'
+    _title: "test controller"
+  requirements:
+    _permission: "access content"
+
+user_data_form.register_student:
+  path: "/register-student"
+  defaults:
+    _form: '\Drupal\user_data_form\Form\user_register'
+    _title: "Registration"
+
+  requirements:
+    _permission: "access control"
+    _access: "TRUE"

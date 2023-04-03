@@ -1,0 +1,5 @@
+name: "User data form"
+type: module
+description: "Form to collect user data and store it in database"
+package: Custom 
+core_version_requirement: ^8 || ^9

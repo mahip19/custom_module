@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Webform module.
+ */
+
+/**
+ * Implements hook_schema().
+ *
+ * Even though Webform's are config entities we need to create a 'webform' table
+ * to track webform submission serial numbers using DB transaction locking.
+ *
+ * @see \Drupal\webform\WebformEntityStorage
+ */
+function mydata_schema()
+{
+    // $schema = array();
+    $schema['user_data'] = array(
+        'description' => 'student user data',
+        'fields' => array(
+            'id' => array(
+                'description' => 'user unique id',
+                'unsigned' => TRUE,
+                'type' => 'serial',
+                'not null' => TRUE,
+            ),
+            'name' => array(
+                'description' => 'User Name',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'phone' => array(
+                'description' => 'User Phone.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'email' => array(
+                'description' => 'User Email ID',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+            ),
+            'gender' => array(
+                'description' => 'User Gender',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+            ),
+            'age' => array(
+                'description' => 'Age of User',
+                'type' => 'int',
+                'length' => 100,
+                'not null' => TRUE,
+            ),
+
+
+
+
+        ),
+        'primary key' => array('id'),
+
+    );
+    return $schema;
+}
