@@ -1,0 +1,5 @@
+name: Dynamic Routing Module
+type: module
+package: Custom
+description: Shows all about taxonomy vocabs
+core_version_requirement: ^8 || ^9
