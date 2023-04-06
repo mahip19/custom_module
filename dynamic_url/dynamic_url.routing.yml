@@ -1,9 +1,10 @@
 dynamic_url.display_vocab:
-  path: "/vocabulary/{vid}/{id}"
+  path: "/vocabulary/{vid}/{id}/{sort_ord}"
   defaults:
     _controller: '\Drupal\dynamic_url\Controller\displayVocabController::display'
     _title: "Vocabulary"
     id: ""
     vid: ""
+    sort_ord: ""
   requirements:
     _permission: "access content"
