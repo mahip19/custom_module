@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\rest\ResourceResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+use function PHPSTORM_META\type;
 
 /**
  * Class displayVocabController.
@@ -54,7 +55,7 @@ class displayVocabController extends ControllerBase
             }
             $table_headers = array(
                 'tid' => 'Term ID',
-                'name' => 'Term Name',
+                'name' => $vid,
                 'description' => ("Description"),
                 'vid' => "Vocabulary Name",
             );
@@ -91,7 +92,7 @@ class displayVocabController extends ControllerBase
             // array_multisort($term_res, SORT_ASC);
             $table_headers = array(
                 'tid' => 'Term ID',
-                'name' => 'Term Name',
+                'name' => $vid,
                 'description' => ("Description"),
                 'vid' => "Vocabulary Name",
             );
@@ -113,15 +114,23 @@ class displayVocabController extends ControllerBase
 
         // shows all terms
         else {
-            $vocabs[] = array();
+            $vocabs = [];
             $types_of_vocab = 0;
-            $vocabNames[] = array();
+            $vocabNames = [];
+            $new_table_headers = [];
+            $no = 0;
             foreach ($terms as $term) {
                 $current_vocab = $term->vid->target_id;
                 if (!in_array($current_vocab, $vocabNames)) {
                     $types_of_vocab += 1;
                     $vocabs[$current_vocab] = array();
                     array_push($vocabNames, $current_vocab);
+                    $new_table_headers[] = array(
+                        'tid' => 'Term ID',
+                        'name' => $current_vocab,
+                        'description' => ("Description"),
+                        'vid' => "Vocabulary Name",
+                    );
                 }
                 $vocabs[$current_vocab][] = array(
                     'tid' => $term->tid->value,
@@ -131,9 +140,11 @@ class displayVocabController extends ControllerBase
                 );
             }
 
-            unset($vocabNames[0]);
+            // unset($vocabNames[0]);
+
             if ($_GET['sort'] != NULL) {
                 $_GET['sort'] == 'asc' ? sort($vocabNames) : rsort($vocabNames);
+                $_GET['sort'] == 'asc' ? sort($new_table_headers) : rsort($new_table_headers);
             }
             $table_headers = array(
                 'tid' => 'Term ID',
@@ -149,23 +160,31 @@ class displayVocabController extends ControllerBase
             }
 
             $res[] = array();
+            $count = 0;
             for ($i = 0; $i < sizeof($vocabNames); $i++) {
+                // if (gettype($vocabNames[$i]) == 'array') continue;
                 $row = $vocabs[$vocabNames[$i]];
-                $res[$i * 10] = array(
+                $res[$i + 2] = array(
                     '#type' => 'markup',
                     '#markup' => '<h2><strong>' . $vocabNames[$i] . '</strong></h2>',
                 );
-                $res[$i + 1] = array(
+                $res[$i + 10] = array(
                     '#type' => 'table',
                     '#title' => 'title',
-                    '#header' => $table_headers,
+                    '#header' => $new_table_headers[$i],
                     '#rows' => $_GET['sort'] == NULL ? $row : $this->sortByKey($row, 'name'),
                 );
+                $count++;
             }
+
+            // $res['test'] = array(
+            //     '#type' => 'markup',
+            //     '#markup' => $_GET['sort'] == NULL ? "NO QUERY" : $_GET['sort'],
+            // );
 
             $res['test'] = array(
                 '#type' => 'markup',
-                '#markup' => $_GET['sort'] == NULL ? "NO QUERY" : $_GET['sort'],
+                '#markup' => sizeof($new_table_headers),
             );
 
             return $res;
