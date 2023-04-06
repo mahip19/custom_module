@@ -36,6 +36,7 @@ class displayVocabController extends ControllerBase
         // $q = \Drupal::request()->query->get('values');
         // \Drupal::messenger()->addMessage(gettype($q));
 
+
         $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadMultiple();
 
         // showing specific vocab term
@@ -129,6 +130,11 @@ class displayVocabController extends ControllerBase
                     'vid' => $term->vid->target_id,
                 );
             }
+
+            unset($vocabNames[0]);
+            if ($_GET['sort'] != NULL) {
+                $_GET['sort'] == 'asc' ? sort($vocabNames) : rsort($vocabNames);
+            }
             $table_headers = array(
                 'tid' => 'Term ID',
                 'name' => 'Term Name',
@@ -143,7 +149,7 @@ class displayVocabController extends ControllerBase
             }
 
             $res[] = array();
-            for ($i = 1; $i < sizeof($vocabNames); $i++) {
+            for ($i = 0; $i < sizeof($vocabNames); $i++) {
                 $row = $vocabs[$vocabNames[$i]];
                 $res[$i * 10] = array(
                     '#type' => 'markup',
