@@ -3,12 +3,7 @@
 namespace Drupal\dynamic_url\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Database\Database;
-use Drupal\Core\Url;
-use Drupal\rest\ResourceResponse;
-use Symfony\Component\HttpFoundation\Response;
 
-use function PHPSTORM_META\type;
 
 /**
  * Class displayVocabController.
@@ -25,12 +20,36 @@ class displayVocabController extends ControllerBase
      * @return void
      */
 
+    //  sorts multidimentional array by key
     public function sortByKey($arr, $key)
     {
         $key_arr = array_column($arr, $key);
         $_GET['sort'] == "asc" ? array_multisort($key_arr, SORT_ASC, $arr) : array_multisort($key_arr, SORT_DESC, $arr);
         return $arr;
     }
+
+    // returns Table Header array
+    public function getTableHeader($name)
+    {
+        $table_header = array(
+            'tid' => 'Term ID',
+            'name' => $name,
+            'description' => ("Description"),
+            'vid' => "Vocabulary Name",
+
+        );
+        return $table_header;
+    }
+
+    //  returns error page
+    public function errorHandler()
+    {
+        return [
+            '#type' => 'markup',
+            '#markup' => $this->t('No records found'),
+        ];
+    }
+
 
     public function display($vid, $id, $sort_ord)
     {
@@ -53,18 +72,21 @@ class displayVocabController extends ControllerBase
                     );
                 }
             }
-            $table_headers = array(
-                'tid' => 'Term ID',
-                'name' => $vid,
-                'description' => ("Description"),
-                'vid' => "Vocabulary Name",
-            );
+            // TABLE HEADER ARRAY
+            $table_headers = $this->getTableHeader($vid);
+
+            // return if no records found
             if (!$term_res) {
-                return [
-                    '#type' => 'markup',
-                    '#markup' => $this->t('No records found'),
-                ];
+                return $this->errorHandler();
             }
+
+            // shows vocab title for table
+            $res['vocabTitle'] = [
+                '#type' => 'markup',
+                '#markup' => '<h2><strong>' . $vid . '</strong></h2>',
+            ];
+
+            // returns result table
             $res['table'] = [
                 '#type' => 'table',
                 '#title' => 'Taxonomy',
@@ -73,6 +95,7 @@ class displayVocabController extends ControllerBase
 
             ];
             return $res;
+
 
             // shows all terms of given vocab
         } else if ($vid != NULL) {
@@ -86,27 +109,28 @@ class displayVocabController extends ControllerBase
                 );
             }
 
+            // sorting data by name
+            if ($_GET['sort'] != NULL) $term_res = $this->sortByKey($term_res, 'name');
 
-            $sorted = $this->sortByKey($term_res, 'name');
-            // usort($term_res, 'sortByName');
-            // array_multisort($term_res, SORT_ASC);
-            $table_headers = array(
-                'tid' => 'Term ID',
-                'name' => $vid,
-                'description' => ("Description"),
-                'vid' => "Vocabulary Name",
-            );
+            // table header array
+
+            $table_headers = $this->getTableHeader($vid);
+
+
             if (!$term_res) {
-                return [
-                    '#type' => 'markup',
-                    '#markup' => 'No records found',
-                ];
+                return $this->errorHandler();
             }
+
+
+            $res['vocabTitle'] = [
+                '#type' => 'markup',
+                '#markup' => '<h2><strong>' . $vid . '</strong></h2>',
+            ];
             $res['table'] = [
                 '#type' => 'table',
                 '#title' => 'Taxonomy',
                 '#header' => $table_headers,
-                '#rows' => $sorted,
+                '#rows' => $term_res,
 
             ];
             return $res;
@@ -114,24 +138,25 @@ class displayVocabController extends ControllerBase
 
         // shows all terms
         else {
-            $vocabs = [];
-            $types_of_vocab = 0;
-            $vocabNames = [];
-            $new_table_headers = [];
-            $no = 0;
+            $vocabs = []; //result 
+            $types_of_vocab = 0; //number of unique vocabs
+            $vocabNames = []; // list of vocab names
+            $new_table_headers = []; //table headers
+
             foreach ($terms as $term) {
                 $current_vocab = $term->vid->target_id;
+
+                // append new vocab into vocabNames
                 if (!in_array($current_vocab, $vocabNames)) {
                     $types_of_vocab += 1;
                     $vocabs[$current_vocab] = array();
                     array_push($vocabNames, $current_vocab);
-                    $new_table_headers[] = array(
-                        'tid' => 'Term ID',
-                        'name' => $current_vocab,
-                        'description' => ("Description"),
-                        'vid' => "Vocabulary Name",
-                    );
+
+
+                    $new_table_headers[] = $this->getTableHeader($current_vocab);
                 }
+
+                // if vocab already present, insert term into that specific vocab
                 $vocabs[$current_vocab][] = array(
                     'tid' => $term->tid->value,
                     'name' => $term->name->value,
@@ -142,32 +167,34 @@ class displayVocabController extends ControllerBase
 
             // unset($vocabNames[0]);
 
+            // checks if query contains 'sort'
             if ($_GET['sort'] != NULL) {
+
+                // sorting vocabNames and tableHeaders 
+                // using builtin sort function because both these are 1D array
                 $_GET['sort'] == 'asc' ? sort($vocabNames) : rsort($vocabNames);
                 $_GET['sort'] == 'asc' ? sort($new_table_headers) : rsort($new_table_headers);
             }
-            $table_headers = array(
-                'tid' => 'Term ID',
-                'name' => 'Term Name',
-                'description' => ("Description"),
-                'vid' => "Vocabulary Name",
-            );
+
             if (!$vocabs) {
-                return [
-                    '#type' => 'markup',
-                    '#markup' => $this->t('No records found'),
-                ];
+                return $this->errorHandler();
             }
 
-            $res[] = array();
+            $res[] = array(); //final result array for showing tables
             $count = 0;
             for ($i = 0; $i < sizeof($vocabNames); $i++) {
                 // if (gettype($vocabNames[$i]) == 'array') continue;
+
+                // getting current term data
                 $row = $vocabs[$vocabNames[$i]];
+
+                // creates table title
                 $res[$i + 2] = array(
                     '#type' => 'markup',
                     '#markup' => '<h2><strong>' . $vocabNames[$i] . '</strong></h2>',
                 );
+
+                // creates result table
                 $res[$i + 10] = array(
                     '#type' => 'table',
                     '#title' => 'title',
@@ -177,11 +204,7 @@ class displayVocabController extends ControllerBase
                 $count++;
             }
 
-            // $res['test'] = array(
-            //     '#type' => 'markup',
-            //     '#markup' => $_GET['sort'] == NULL ? "NO QUERY" : $_GET['sort'],
-            // );
-
+            // FOR TESTING
             $res['test'] = array(
                 '#type' => 'markup',
                 '#markup' => sizeof($new_table_headers),
