@@ -35,7 +35,7 @@ class displayVocabController extends ControllerBase
             'term_id' => 'Term ID',
             'name' => $name,
             'description' => ("Description"),
-            'vocab_name' => "Vocabulary N  ame",
+            'vocab_name' => "Vocabulary Name",
 
         );
         return $table_header;
@@ -51,6 +51,13 @@ class displayVocabController extends ControllerBase
     }
 
 
+    /**
+     * Summary of isSortValid
+     * @param mixed $vocab_name
+     * @param mixed $term_id
+     * @param mixed $sort_ord
+     * @return string
+     */
     public function isSortValid($vocab_name, $term_id, $sort_ord)
     {
 
@@ -65,6 +72,43 @@ class displayVocabController extends ControllerBase
         return '';
     }
 
+
+    public function get_term_with_term_id($term_id, $vocab_name, $terms)
+    {
+        foreach ($terms as $term) {
+            if ($term->vid->target_id == $vocab_name && $term->tid->value == $term_id) {
+                $terms_list[] = array(
+                    'term_id' => $term->tid->value,
+                    'name' => $term->name->value,
+                    'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
+                    'vocab_name' => $term->vid->target_id,
+                );
+            }
+        }
+        return $terms_list;
+    }
+
+    public function get_term_with_vocab_name($vocab_name, $terms)
+    {
+        foreach ($terms as $term) {
+            if ($term->vid->target_id != $vocab_name) continue;
+            $terms_list[] = array(
+                'term_id' => $term->tid->value,
+                'name' => $term->name->value,
+                'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
+                'vocab_name' => $term->vid->target_id,
+            );
+        }
+        return $terms_list;
+    }
+
+    /**
+     * Summary of display
+     * @param mixed $vocab_name
+     * @param mixed $term_id
+     * @param mixed $sort_ord
+     * @return array
+     */
     public function display($vocab_name, $term_id, $sort_ord)
     {
 
@@ -89,16 +133,9 @@ class displayVocabController extends ControllerBase
         // showing specific vocab term
         if ($term_id != NULL && $vocab_name != NULL) {
 
-            foreach ($terms as $term) {
-                if ($term->vid->target_id == $vocab_name && $term->tid->value == $term_id) {
-                    $terms_list[] = array(
-                        'term_id' => $term->tid->value,
-                        'name' => $term->name->value,
-                        'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
-                        'vocab_name' => $term->vid->target_id,
-                    );
-                }
-            }
+            // get list of terms
+            $terms_list = $this->get_term_with_term_id($term_id, $vocab_name, $terms);
+
             // TABLE HEADER ARRAY
             $table_headers = $this->getTableHeader($vocab_name);
 
@@ -113,27 +150,19 @@ class displayVocabController extends ControllerBase
                 '#markup' => '<h2><strong>' . $vocab_name . '</strong></h2>',
             ];
 
-            // returns result table
             $res['table'] = [
                 '#type' => 'table',
                 '#title' => 'Taxonomy',
                 '#header' => $table_headers,
                 '#rows' => $terms_list,
-
             ];
-            return $res;
+
 
             // shows all terms of given vocab
         } else if ($vocab_name != NULL) {
-            foreach ($terms as $term) {
-                if ($term->vid->target_id != $vocab_name) continue;
-                $terms_list[] = array(
-                    'term_id' => $term->tid->value,
-                    'name' => $term->name->value,
-                    'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
-                    'vocab_name' => $term->vid->target_id,
-                );
-            }
+
+            // get list of terms
+            $terms_list = $this->get_term_with_vocab_name($vocab_name, $terms);
 
             // sorting data by name
             // @todo try using clean urls
@@ -158,8 +187,6 @@ class displayVocabController extends ControllerBase
                 '#header' => $table_headers,
                 '#rows' => $terms_list,
             ];
-
-            return $res;
         }
 
         // shows all terms
@@ -237,8 +264,7 @@ class displayVocabController extends ControllerBase
                 '#type' => 'markup',
                 '#markup' => $sort_order,
             );
-
-            return $res;
         }
+        return $res;
     }
 }
