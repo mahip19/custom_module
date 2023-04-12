@@ -102,6 +102,29 @@ class displayVocabController extends ControllerBase
         return $terms_list;
     }
 
+    public function get_all_terms_with_vocabNames($terms, &$vocabs, &$vocabNames, &$new_table_headers)
+    {
+        foreach ($terms as $term) {
+            $current_vocab = $term->vid->target_id;
+
+            // append new vocab into vocabNames
+            if (!in_array($current_vocab, $vocabNames)) {
+                $vocabs[$current_vocab] = array();
+                array_push($vocabNames, $current_vocab);
+                $new_table_headers[] = $this->getTableHeader($current_vocab);
+            }
+
+            // if vocab already present, insert term into that specific vocab
+            $vocabs[$current_vocab][] = array(
+                'term_id' => $term->tid->value,
+                'name' => $term->name->value,
+                'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
+                'vocab_name' => $term->vid->target_id,
+            );
+        }
+    }
+
+
     /**
      * Summary of display
      * @param mixed $vocab_name
@@ -192,29 +215,10 @@ class displayVocabController extends ControllerBase
         // shows all terms
         else {
             $vocabs = []; //result 
-            $types_of_vocab = 0; //number of unique vocabs
             $vocabNames = []; // list of vocab names
             $new_table_headers = []; //table headers
 
-            foreach ($terms as $term) {
-                $current_vocab = $term->vid->target_id;
-
-                // append new vocab into vocabNames
-                if (!in_array($current_vocab, $vocabNames)) {
-                    $types_of_vocab += 1;
-                    $vocabs[$current_vocab] = array();
-                    array_push($vocabNames, $current_vocab);
-                    $new_table_headers[] = $this->getTableHeader($current_vocab);
-                }
-
-                // if vocab already present, insert term into that specific vocab
-                $vocabs[$current_vocab][] = array(
-                    'term_id' => $term->tid->value,
-                    'name' => $term->name->value,
-                    'description' => $term->description->processed == NULL ? 'No description' : $term->description->processed,
-                    'vocab_name' => $term->vid->target_id,
-                );
-            }
+            $this->get_all_terms_with_vocabNames($terms, $vocabs, $vocabNames, $new_table_headers);
 
             // checks if query contains 'sort'
             if ($do_sort) {
@@ -223,20 +227,12 @@ class displayVocabController extends ControllerBase
                 $sort_order == "asc" ? sort($vocabNames) : rsort($vocabNames);
                 $sort_order == "asc" ? sort($new_table_headers) : rsort($new_table_headers);
             }
-            // if ($_GET['sort'] != NULL) {
-
-            //     // sorting vocabNames and tableHeaders 
-            //     // using builtin sort function because both these are 1D array
-            //     $_GET['sort'] == 'asc' ? sort($vocabNames) : rsort($vocabNames);
-            //     $_GET['sort'] == 'asc' ? sort($new_table_headers) : rsort($new_table_headers);
-            // }
 
             if (!$vocabs) {
                 return $this->errorHandler();
             }
 
-            $res[] = array(); //final result array for showing tables
-            $count = 0;
+            // $res[] = array(); //final result array for showing tables
             for ($i = 0; $i < sizeof($vocabNames); $i++) {
                 // if (gettype($vocabNames[$i]) == 'array') continue;
 
@@ -256,7 +252,6 @@ class displayVocabController extends ControllerBase
                     '#header' => $new_table_headers[$i],
                     '#rows' => !$do_sort ? $row : $this->sortByKey($row, 'name', $sort_order),
                 );
-                $count++;
             }
 
             // FOR TESTING
