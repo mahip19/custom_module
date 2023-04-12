@@ -124,6 +124,29 @@ class displayVocabController extends ControllerBase
         }
     }
 
+    public function generate_final_result_array(&$res, $vocabNames, $vocabs, $new_table_headers, $sort_order, $do_sort)
+    {
+        for ($i = 0; $i < sizeof($vocabNames); $i++) {
+            // if (gettype($vocabNames[$i]) == 'array') continue;
+
+            // getting current term data
+            $row = $vocabs[$vocabNames[$i]];
+
+            // creates table title
+            $res[$i + 2] = array(
+                '#type' => 'markup',
+                '#markup' => '<h2><strong>' . $vocabNames[$i] . '</strong></h2>',
+            );
+
+            // creates result table
+            $res[$i + 10] = array(
+                '#type' => 'table',
+                '#title' => 'title',
+                '#header' => $new_table_headers[$i],
+                '#rows' => !$do_sort ? $row : $this->sortByKey($row, 'name', $sort_order),
+            );
+        }
+    }
 
     /**
      * Summary of display
@@ -232,34 +255,14 @@ class displayVocabController extends ControllerBase
                 return $this->errorHandler();
             }
 
-            // $res[] = array(); //final result array for showing tables
-            for ($i = 0; $i < sizeof($vocabNames); $i++) {
-                // if (gettype($vocabNames[$i]) == 'array') continue;
-
-                // getting current term data
-                $row = $vocabs[$vocabNames[$i]];
-
-                // creates table title
-                $res[$i + 2] = array(
-                    '#type' => 'markup',
-                    '#markup' => '<h2><strong>' . $vocabNames[$i] . '</strong></h2>',
-                );
-
-                // creates result table
-                $res[$i + 10] = array(
-                    '#type' => 'table',
-                    '#title' => 'title',
-                    '#header' => $new_table_headers[$i],
-                    '#rows' => !$do_sort ? $row : $this->sortByKey($row, 'name', $sort_order),
-                );
-            }
-
-            // FOR TESTING
-            $res['test'] = array(
-                '#type' => 'markup',
-                '#markup' => $sort_order,
-            );
+            $res[] = array(); //final result array for showing tables
+            $this->generate_final_result_array($res, $vocabNames, $vocabs, $new_table_headers, $sort_order, $do_sort);
         }
+        // FOR TESTING
+        $res['test'] = array(
+            '#type' => 'markup',
+            '#markup' => $sort_order,
+        );
         return $res;
     }
 }
