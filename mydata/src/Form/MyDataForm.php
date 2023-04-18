@@ -66,11 +66,52 @@ class MydataForm extends FormBase
             '#type' => 'select',
             '#title' => ('Gender'),
             '#options' => array(
-                'Female' => $this->t('Female'),
+                'female' => $this->t('Female'),
                 'male' => $this->t('Male'),
                 '#default_value' => (isset($record['gender']) && $_GET['num']) ? $record['gender'] : '',
             ),
         );
+        $form['candidate_fee_status'] = array(
+            '#type' => 'radios',
+            '#title' => ('Fees Paid'),
+            '#options' => array(
+                'yes' => $this->t('Yes'),
+                'no' => $this->t('No'),
+                '#default_value' => (isset($record['gender']) && $_GET['num']) ? $record['gender'] : '',
+            ),
+        );
+
+        $form['candidate_interests'] = array(
+            '#type' => 'checkboxes',
+            '#title' => 'Student Interests',
+            '#options' => array(
+                'sports' => $this->t('Sports'),
+                'reading' => $this->t('Reading'),
+                'volunteering' => $this->t('Volunteering'),
+                'music' => $this->t('Music'),
+            )
+        );
+        $form['candidate_tribe_color'] = array(
+            '#type' => 'color',
+            '#title' => 'Tribe Color',
+        );
+        $form['candidate_birth_time'] = array(
+            '#type' => 'datetime',
+            '#title' => 'Birth Time',
+        );
+        $form['candidate_birth_certi'] = array(
+            '#type' => 'file',
+            '#title' => 'Birth Certificate',
+        );
+
+
+        $form['candidate_cnf_password'] = array(
+            '#type' => 'password_confirm',
+            '#title' => 'Confirm Password',
+        );
+
+
+
 
         $form['submit'] = [
             '#type' => 'submit',
@@ -114,7 +155,13 @@ class MydataForm extends FormBase
         $email = $field['candidate_mail'];
         $age = $field['candidate_age'];
         $gender = $field['candidate_gender'];
-
+        print_r($field);
+        \Drupal::messenger()->addMessage($this->t('Registered Successfully. Form values are: '));
+        foreach ($form_state->getValues() as $key => $value) {
+            # code..
+            \Drupal::messenger()->addMessage($key . ': ' . $value);
+        }
+        exit();
         if (isset($_GET['num'])) {
             $field  = array(
                 'name'   => $name,

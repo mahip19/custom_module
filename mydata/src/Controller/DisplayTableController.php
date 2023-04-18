@@ -41,6 +41,10 @@ class DisplayTableController extends ControllerBase
       '#type' => 'markup',
       '#markup' => $this->t('Implement method: display with parameter(s): $name'),
     ];*/
+        $service = \Drupal::service('mydata.current_user');
+
+        \Drupal::messenger()->addMessage($service->greet());
+
         //create table header
         $header_table = array(
             'id' =>    $this->t('SrNo'),

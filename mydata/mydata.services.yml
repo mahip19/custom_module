@@ -1,0 +1,4 @@
+services:
+  mydata.current_user:
+    class: \Drupal\mydata\greetUser
+    arguments: ["@current_user"]
