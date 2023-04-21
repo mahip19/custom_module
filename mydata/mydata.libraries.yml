@@ -1,0 +1,7 @@
+customLib:
+  version: 1.0
+  css:
+    theme:
+      css/bodycolor.css: {}
+  js:
+    js/alert.js: {}

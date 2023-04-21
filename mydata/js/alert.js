@@ -1,0 +1,1 @@
+alert("customLib is enabled");

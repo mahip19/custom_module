@@ -89,6 +89,7 @@ class DisplayTableController extends ControllerBase
             '#rows' => $rows,
             '#empty' => $this->t('No users found'),
         ];
+        $form['#attached']['library'][] = 'mydata/customLib';
         return $form;
     }
 }
