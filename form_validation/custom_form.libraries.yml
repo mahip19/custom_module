@@ -1,0 +1,6 @@
+formValidationLib:
+  version: 1.x
+  js:
+    js/form_validation.js: {}
+  dependencies:
+    - core/jquery

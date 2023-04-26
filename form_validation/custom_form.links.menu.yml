@@ -1,0 +1,13 @@
+custom_module.main_form_link:
+  title: "Register Form"
+  description: "A basic registration form"
+  parent: main
+  route_name: custom_form.basic_form
+  menu_name: main
+
+custom_module.admin_form_link:
+  title: "Register Form"
+  description: "A basic registration form"
+  parent: system.admin
+  route_name: custom_form.basic_form
+  # menu_name: main
