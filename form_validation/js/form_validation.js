@@ -2,6 +2,9 @@
 (function ($) {
   "use strict";
 
+  /**
+   *  the Drupal.behaviors object is used to attach the form validation function to the form, and the once() method is used to ensure that the function is only attached once.
+   */
   Drupal.behaviors.formValidation = {
     // Use context to filter the DOM to only the elements of interest,
     // and use once() to guarantee that our callback function processes
@@ -12,6 +15,9 @@
       var $form = $("form#user-details", context);
 
       // 'once'  Ensures a JavaScript callback is only executed once on a set of elements.
+      /**
+       * The once() method ensures that the validation is only attached once to the form, even if the form is loaded multiple times on the page
+       */
       $form.once("custom_validation").on("submit", function (event) {
         var $name = $form.find('input[name="candidate_name"]');
         var $email = $form.find('input[name="candidate_mail"]');
